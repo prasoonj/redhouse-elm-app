@@ -1,0 +1,11 @@
+{
+    "name": "red-house",
+    "version": "1.0.0",
+    "scripts": {
+        "api": "elm-graphql http://localhost:8080/red-house --base RedHouse"
+    },
+    "devDependencies": {
+        "@dillonkearns/elm-graphql": "^3.2.0"
+    },
+    "dependencies": {}
+}

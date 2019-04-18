@@ -211,9 +211,10 @@ header model =
                                     }
          )
     , el [ padding 5
-         , Font.heavy
+         , Font.extraBold
+         , Font.size (round <| scaled 1)
          ]
-      (text "RedHouse - Free Market!")
+        (text "RedHouse - Free Market!")
     , row [ alignRight
           , spacing 10
           , padding 20
@@ -355,10 +356,20 @@ content model =
                         [ itemContainer a.items ]
 
                     RemoteData.Loading ->
-                        [ ( text "Loading ..." ) ]
+                        [ el
+                            [ centerX
+                            , Font.extraBold
+                            ]
+                            ( text "Loading ..." ) ]
+
 
                     RemoteData.Failure f ->
-                        [ ( text "Failed to fetch data. Please reload." ) ]
+                        [ el 
+                            [ centerX
+                            , Font.extraBold
+                            ]
+                            ( text "Failed to fetch data. Please reload." ) 
+                        ]
                 )
     
         Just (ItemRoute id) ->
@@ -395,7 +406,7 @@ itemDetail item =
     wrappedRow
         [ width fill ]
         [ column 
-            [  width <| fillPortion 3 ]
+            [  width <| fillPortion 1 ]
             [ image
                 [ height <| px 250
                 , padding 50
@@ -406,15 +417,10 @@ itemDetail item =
                 }
             ]
         , column
-            [ width <| fillPortion 5 ]
+            [ width <| fillPortion 1 ]
             [ el 
                 [ padding 20
                 , Font.size 36
-                , Font.family
-                    [ Font.typeface "Helvetica"
-                    , Font.sansSerif
-                    ]
-                , Font.italic
                 ] 
                 (text item.tagLine)
             , el 
@@ -435,43 +441,40 @@ specsView specs =
             Just sps ->
                 List.map (\spec -> paragraph [] [ text spec ]) sps)
 
+
 itemTile : Item -> Element Msg
 itemTile item =
     column
-        [ height <| px 300
-        , width <| px 250
-        , centerX
-        , Background.color <| rgb255 90 90 90
-        , Background.image 
-            <| case item.url of
-                Just a -> a
-                Nothing -> defaults.itemImage
+        [ Background.color <| rgba255 138 147 142 0.33
+        , padding 10
+        , Font.family 
+            [ Font.typeface "Proxima Nova Extra Bold"
+            , Font.sansSerif
+            ]
         ]
-        [ paragraph 
-            [ Background.color <| rgba255 53 66 75 0.75 ] 
-            [ text item.tagLine ]
-        , el [ alignBottom
-             , width fill
-             ]
-             ( link [ width fill ]
-                 { url = "/item/" ++ item.id
-                 , label = text "Look Inside"
-                 }
-             )
-            --  (Input.button 
-            --         [ Background.color <| rgba255 53 66 75 0.75
-            --         , width fill
-            --         , height <| px 50
-            --         ]
-            --         { label = text "Look inside"
-            --         , onPress = case fromString "/item/$item.id" of
-            --             Just a ->
-            --                 UrlChanged a
-                    
-            --             Nothing ->
-            --                 NoOp
-            --         }
-            --     ) 
+        [ image 
+            [ height (fill |> minimum 300)
+            , width (fill |> minimum 350)
+            ]
+            { src = Maybe.withDefault defaults.itemImage item.url
+            , description = Maybe.withDefault "No description available" item.description 
+            }
+        , paragraph 
+            [ Font.bold
+            , Font.size (round <| scaled 2)
+            , width (fill |> minimum 300)
+            , padding 10
+            ]
+            [ (text item.tagLine) ]
+        , image 
+            [ alignBottom
+            , width <| px 30
+            , height <| px 30
+            , centerX
+            ]
+            { src = "baseline-expand_more-24px.svg"
+            , description = "Click to expand."
+            }
         ]
 
 itemContainer : List Item -> Element Msg
@@ -479,22 +482,73 @@ itemContainer itemsL =
     wrappedRow 
     [ width fill
     , padding 30
-    , spacing 30
+    , spacing 2
     , scrollbarY
+    , centerX
     ] 
     <| List.map itemTile itemsL
 
+
+footerColumnAttribs : Int -> List (Element.Attribute Msg)
+footerColumnAttribs leftColumnWidth =
+    [ width <| fillPortion 1
+    , height fill
+    , padding 10
+    , Font.variant Font.smallCaps
+    , Font.size (round <| scaled 1)
+    , Border.widthEach
+        { right = leftColumnWidth
+        , left = 0
+        , top = 0
+        , bottom = 0
+        }
+    , Border.color (rgb255 255 255 255)
+    ]
+
 footer : Element Msg
 footer =
-    row
+    column
     [ width fill 
     , height <| fillPortion 2
-    , spacing 50
+    , spacing 100
     , padding 50
+    , Background.color <| (rgb255 34 34 34)
+    , Font.color <| (rgb255 255 255 255)
+    , Font.italic
     ]
-    [ el  [ centerX
-          --, Font.size (scaled 1)
-          ] (text "Made with love using Elm and Scala") ]
+    [ row 
+        [ width fill
+        ]
+        [ column (footerColumnAttribs 1)
+            [ (text "WHY")
+            , paragraph 
+                [ centerX
+                , Font.size (round <| scaled -1) 
+                , Font.hairline
+                , padding 20
+                , Font.alignLeft
+                ]
+                [ (text "We believe that consumerism is killing the environment, creating economic and social inequalities and, driving the world towards an unsustainable growth which is restricted to a select few. The future belongs to a culture of sharing. We want to be part of that future!")]
+                 ]
+        , column (footerColumnAttribs 1)
+            [ (text "Support Us")
+            , paragraph
+                [ centerX
+                , Font.size (round <| scaled -1)
+                , Font.hairline
+                , padding 20
+                , Font.alignLeft
+                ]
+                [ (text "Please support us on Patreon or contact us (pledge@redhouse.org) if you have ideas on how to spread the word about Red House!")]
+            ]
+        , column (footerColumnAttribs 0)
+            [ (text "Contact")]
+        ]
+    , el  
+        [ centerX
+        , Font.size (round <| scaled -1)
+        ] 
+        (text " ~ Made with love using Elm and Scala ~") ]
 
 
 
@@ -506,20 +560,23 @@ view model =
 
 body : Model -> List (Html Msg)
 body model =
-    [ layout [ Font.family  
-                [ Font.typeface "Gotham Rounded A"
-                , Font.sansSerif
-                ]
-            ] <|
-     column [ height fill
+    [ layout 
+        [ Font.family  
+            [ Font.typeface "Gotham Rounded A"
+            , Font.sansSerif
+            ]
+        , Font.color <| rgb255 10 10 10
+        ] <|
+        column 
+            [ height fill
             , width fill
             , spacing 20
             ]
-         [ header model
-         , searchBar model
-         , content model
-         , footer
-         ]
+            [ header model
+            , searchBar model
+            , content model
+            , footer
+            ]
     ]
 
 
